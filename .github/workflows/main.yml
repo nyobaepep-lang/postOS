@@ -24,16 +24,28 @@ jobs:
       - name: Initialize pmbootstrap
         run: |
           export PATH="$HOME/.local/bin:$PATH"
-          pmbootstrap config vendor oppo
           pmbootstrap config device oppo-a37f
-          pmbootstrap config channel edge
           pmbootstrap config ui phosh
+          pmbootstrap config user user
           yes "" | pmbootstrap init
 
       - name: Build postmarketOS Image
         run: |
           export PATH="$HOME/.local/bin:$PATH"
-          pmbootstrap install --no-fde
+          pmbootstrap install --no-fde --password 1234
+
+      - name: Prepare Artifacts
+        run: |
+          mkdir -p output
+          sudo cp -r ~/.local/var/pmbootstrap/images/. output/
+          sudo chown -R $USER:$USER output/
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pmos-oppo-a37f-image
+          path: output/
+          retention-days: 7
 
       - name: Prepare Artifacts
         run: |
