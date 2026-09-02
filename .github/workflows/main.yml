@@ -1,0 +1,48 @@
+name: Build postmarketOS (Oppo A37f)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-pmos:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git python3-pip pipx python3-wheel
+
+      - name: Install pmbootstrap
+        run: |
+          pipx install git+https://gitlab.postmarketos.org/postmarketOS/pmbootstrap.git
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Initialize pmbootstrap
+        run: |
+          pmbootstrap --non-interactive init \
+            --vendor oppo \
+            --device oppo-a37f \
+            --ui phosh \
+            --channel edge
+
+      - name: Build postmarketOS Image
+        run: |
+          pmbootstrap install --no-fde
+
+      - name: Prepare Artifacts
+        run: |
+          mkdir -p output
+          sudo cp -r ~/.local/var/pmbootstrap/images/. output/
+          sudo chown -R $USER:$USER output/
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pmos-oppo-a37f-image
+          path: output/
+          retention-days: 7
+          
