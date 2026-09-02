@@ -40,9 +40,9 @@ jobs:
 
       - name: Prepare Artifacts
         run: |
+          export PATH="$HOME/.local/bin:$PATH"
           mkdir -p output
-          sudo cp -r ~/.local/var/pmbootstrap/images/. output/
-          sudo chown -R $USER:$USER output/
+          pmbootstrap export ./output
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
