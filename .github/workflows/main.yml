@@ -11,10 +11,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install System Dependencies
+      - name: Install System Dependencies & QEMU
         run: |
           sudo apt-get update
-          sudo apt-get install -y git python3-pip pipx python3-wheel
+          sudo apt-get install -y git python3-pip pipx python3-wheel qemu-user-static binfmt-support
 
       - name: Install pmbootstrap
         run: |
@@ -23,14 +23,16 @@ jobs:
 
       - name: Initialize pmbootstrap
         run: |
-          pmbootstrap --non-interactive init \
-            --vendor oppo \
-            --device oppo-a37f \
-            --ui phosh \
-            --channel edge
+          export PATH="$HOME/.local/bin:$PATH"
+          pmbootstrap config vendor oppo
+          pmbootstrap config device oppo-a37f
+          pmbootstrap config channel edge
+          pmbootstrap config ui phosh
+          yes "" | pmbootstrap init
 
       - name: Build postmarketOS Image
         run: |
+          export PATH="$HOME/.local/bin:$PATH"
           pmbootstrap install --no-fde
 
       - name: Prepare Artifacts
@@ -45,4 +47,3 @@ jobs:
           name: pmos-oppo-a37f-image
           path: output/
           retention-days: 7
-          
