@@ -21,12 +21,16 @@ jobs:
           pipx install git+https://gitlab.postmarketos.org/postmarketOS/pmbootstrap.git
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Initialize pmbootstrap
+      - name: Initialize pmbootstrap Configuration
         run: |
           export PATH="$HOME/.local/bin:$PATH"
-          pmbootstrap config device oppo-a37f
-          pmbootstrap config ui phosh
-          pmbootstrap config user user
+          mkdir -p ~/.config
+          cat << 'EOF' > ~/.config/pmbootstrap.cfg
+          [pmbootstrap]
+          device = oppo-a37f
+          ui = phosh
+          user = user
+          EOF
           yes "" | pmbootstrap init
 
       - name: Build postmarketOS Image
@@ -46,16 +50,4 @@ jobs:
           name: pmos-oppo-a37f-image
           path: output/
           retention-days: 7
-
-      - name: Prepare Artifacts
-        run: |
-          mkdir -p output
-          sudo cp -r ~/.local/var/pmbootstrap/images/. output/
-          sudo chown -R $USER:$USER output/
-
-      - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: pmos-oppo-a37f-image
-          path: output/
-          retention-days: 7
+          
